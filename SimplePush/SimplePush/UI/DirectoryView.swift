@@ -11,16 +11,16 @@ import Combine
 import SimplePushKit
 
 struct DirectoryView: View {
-    var rootViewModel: RootViewModel
-    @ObservedObject var viewModel: DirectoryViewModel
+    @EnvironmentObject var rootViewCoordinator: RootViewCoordinator
+    @StateObject private var viewModel = DirectoryViewModel()
     
     var body: some View {
         NavigationView {
             ZStack {
                 List(viewModel.users) { user in
-                    Button(action: {
-                        rootViewModel.presentedView = .user(user, nil)
-                    }) {
+                    Button {
+                        rootViewCoordinator.presentedView = .user(user, nil)
+                    } label: {
                         HStack {
                             Text(user.deviceName)
                                 .font(.headline)
@@ -28,7 +28,7 @@ struct DirectoryView: View {
                                 .foregroundColor(Color("Colors/PrimaryText"))
                             Spacer()
                             Circle()
-                                .fill(self.fillForCallIndicator(user: user))
+                                .fill(fillForCallIndicator(user: user))
                                 .frame(width: 10.0)
                         }
                     }
@@ -37,19 +37,19 @@ struct DirectoryView: View {
                 .environment(\.defaultMinListRowHeight, 50.0)
                 
                 VStack {
-                    if self.viewModel.state != .connected {
-                        self.placeholderView(state: self.viewModel.state)
+                    if viewModel.state != .connected {
+                        placeholderView(state: viewModel.state)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                             .edgesIgnoringSafeArea(.all)
-                            .background(self.viewModel.state == .connected ? Color.clear : Color("Colors/GroupedListBackground"))
-                            .transition(self.transition)
+                            .background(viewModel.state == .connected ? Color.clear : Color("Colors/GroupedListBackground"))
+                            .transition(transition)
                     }
                 }
             }
             .navigationBarTitle("Contacts", displayMode: .large)
-            .navigationBarItems(leading: Button(action: {
-                rootViewModel.presentedView = .settings
-            }) {
+            .navigationBarItems(leading: Button {
+                rootViewCoordinator.presentedView = .settings
+            } label: {
                 Text("Settings")
                     .fontWeight(.medium)
             })
@@ -62,7 +62,7 @@ struct DirectoryView: View {
             image(for: state)
                 .font(.system(size: 60, weight: .light))
                 .foregroundColor(Color("Colors/PrimaryText"))
-            Text(self.viewModel.stateHumanReadable)
+            Text(viewModel.stateHumanReadable)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .multilineTextAlignment(.center)

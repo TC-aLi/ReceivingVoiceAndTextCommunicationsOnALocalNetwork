@@ -12,7 +12,7 @@ import UserNotifications
 import SimplePushKit
 
 class SimplePushProvider: NEAppPushProvider {
-    private let channel = BaseChannel(port: Port.notification, heartbeatTimeout: .seconds(60), logger: Logger(prependString: "Notification Channel", subsystem: .networking))
+    private let channel = BaseChannel(port: Port.notification, heartbeatTimeout: .seconds(30), logger: Logger(prependString: "Notification Channel", subsystem: .networking))
     private var cancellables = Set<AnyCancellable>()
     private let logger = Logger(prependString: "SimplePushProvider", subsystem: .general)
     
@@ -85,6 +85,11 @@ class SimplePushProvider: NEAppPushProvider {
         completionHandler()
     }
     
+    override func handleTimerEvent() {
+        logger.log("Handle timer called")
+        channel.checkConnectionHealth()
+    }
+    
     // MARK: - Notify User
     
     func showLocalNotification(message: TextMessage) {
@@ -120,6 +125,6 @@ class SimplePushProvider: NEAppPushProvider {
             "senderUUIDString": invite.routing.sender.uuid.uuidString
         ]
         
-        self.reportIncomingCall(userInfo: callInfo)
+        reportIncomingCall(userInfo: callInfo)
     }
 }

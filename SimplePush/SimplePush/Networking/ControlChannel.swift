@@ -17,8 +17,8 @@ class ControlChannel: BaseChannel {
         super.init(port: Port.control, heartbeatTimeout: .seconds(20), logger: Logger(prependString: "Control Channel", subsystem: .networking))
         
         SettingsManager.shared.settingsPublisher
-        .sink { settings in
-            self.setHost(settings.host)
+        .sink { [self] settings in
+            setHost(settings.host)
         }
         .store(in: &cancellables)
     }

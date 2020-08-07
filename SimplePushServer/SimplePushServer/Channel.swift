@@ -32,7 +32,7 @@ class Channel {
     
     let type: ChannelType
     let port: UInt16
-    private let dispatchQueue = DispatchQueue(label: "Channel.dispatchQueue", qos: .default)
+    private let dispatchQueue = DispatchQueue(label: "Channel.dispatchQueue")
     private weak var router: Router?
     private var listener: NWListener?
     private var pendingSessions = Set<PendingSession>()
@@ -60,9 +60,9 @@ class Channel {
     public func start() {
         do {
             listener = try NWListener(using: parameters, on: NWEndpoint.Port(rawValue: UInt16(port))!)
-            listener?.newConnectionHandler = { connection in
-                self.logger.log("Received new connection")
-                self.setup(connection: connection)
+            listener?.newConnectionHandler = { [self] connection in
+                logger.log("Received new connection")
+                setup(connection: connection)
             }
             listener?.start(queue: dispatchQueue)
             
@@ -78,10 +78,10 @@ class Channel {
     }
     
     private func setup(connection: NWConnection) {
-        dispatchQueue.async {
+        dispatchQueue.async { [self] in
             let networkSession = RequestResponseSession()
             
-            if self.type == .notification {
+            if type == .notification {
                 // By default a RequestResponseSession disconnects when a request fails. This behavior is undesired when the connection
                 // comes from within an AppPushProvider because the connection could succeed in the near future. For example, a failed
                 // heartbeat in the HeartbeatCoordinator marks the `isSessionResponsive` flag as false rather than tearing down the connection.
@@ -92,22 +92,22 @@ class Channel {
             
             // Observe all messages on the connection, ignoring any that aren't a NetworkSession.RequestResponse.
             networkSession.messagePublisher
-            .receive(on: self.dispatchQueue)
+            .receive(on: dispatchQueue)
             .compactMap { message in
                 message as? User
             }
-            .sink { [weak networkSession] user in
+            .sink { [self, weak networkSession] user in
                 guard let networkSession = networkSession else {
                     return
                 }
                 
-                self.logger.log("Received registration for user \(user.deviceName)")
-                self.router?.register(user: user, session: networkSession, type: self.type)
+                logger.log("Received registration for user \(user.deviceName)")
+                router?.register(user: user, session: networkSession, type: type)
                 pendingSession.cancellables.removeAll()
-                self.pendingSessions.remove(pendingSession)
+                pendingSessions.remove(pendingSession)
             }.store(in: &pendingSession.cancellables)
             
-            self.pendingSessions.insert(pendingSession)
+            pendingSessions.insert(pendingSession)
             networkSession.connect(connection: connection)
         }
     }

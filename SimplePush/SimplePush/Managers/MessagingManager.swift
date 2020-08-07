@@ -23,11 +23,11 @@ class MessagingManager: NSObject {
     }
     
     func requestNotificationPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { [self] granted, error in
             if granted == true && error == nil {
-                self.logger.log("Notification permission granted")
+                logger.log("Notification permission granted")
             } else {
-                self.logger.log("Notification permission denied")
+                logger.log("Notification permission denied")
             }
         }
     }
@@ -47,7 +47,7 @@ class MessagingManager: NSObject {
             let senderName = notification.request.content.userInfo["senderName"] as? String,
             let senderUUIDString = notification.request.content.userInfo["senderUUID"] as? String,
             let senderUUID = UUID(uuidString: senderUUIDString) else {
-                self.logger.log("Notification was missing required user information and cannot be loaded")
+                logger.log("Notification was missing required user information and cannot be loaded")
                 return nil
         }
         

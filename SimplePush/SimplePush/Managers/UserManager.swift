@@ -33,8 +33,8 @@ class UserManager {
                 }
                 
                 // Returns an array of users sorted alphabetically with the current user's own record removed from the list.
-                return directory.users.filter { user in
-                    user.uuid != self.currentUser.uuid
+                return directory.users.filter { [self] user in
+                    user.uuid != currentUser.uuid
                 }.sorted { user1, user2 -> Bool in
                     user1.deviceName < user2.deviceName
                 }
@@ -55,12 +55,12 @@ class UserManager {
         SettingsManager.shared.settingsPublisher
             .combineLatest(ControlChannel.shared.statePublisher)
             .receive(on: dispatchQueue)
-            .filter { settings, state -> Bool in
-                self.currentUser != settings.user && state == .connected
+            .filter { [self] settings, state -> Bool in
+                currentUser != settings.user && state == .connected
             }
-            .sink { settings, state in
+            .sink { [self] settings, state in
                 ControlChannel.shared.request(message: settings.user)
-                self.currentUser = settings.user
+                currentUser = settings.user
             }
             .store(in: &cancellables)
     }

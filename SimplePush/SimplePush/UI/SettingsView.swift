@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct SettingsView: View {
-    @ObservedObject var viewModel: SettingsViewModel
+    @StateObject var viewModel = SettingsViewModel()
     var presenter: Presenter?
     
     var body: some View {
@@ -19,7 +19,7 @@ struct SettingsView: View {
                     textField("Server Address", text: $viewModel.settings.host)
                         .keyboardType(.numbersAndPunctuation)
                 }
-                Section(header: Text("App Push Provider"), footer: Text("The AppPushProvider Network Extension will remain active and receive incoming calls and messages while this device stays on the specified SSID.")) {
+                Section(header: Text("Local Push Connectivity"), footer: Text("The NEAppPushProvider will remain active and receive incoming calls and messages while this device stays on the specified SSID.")) {
                     textField("SSID", text: $viewModel.settings.ssid)
                         .keyboardType(.numbersAndPunctuation)
                     HStack {
@@ -43,8 +43,8 @@ struct SettingsView: View {
     }
     
     private func textField(_ title: String, text: Binding<String>) -> some View {
-        TextField(title, text: text, onCommit: {
-            self.viewModel.commit()
+        TextField(title, text: text, onCommit: { [self] in
+            viewModel.commit()
         })
     }
 }

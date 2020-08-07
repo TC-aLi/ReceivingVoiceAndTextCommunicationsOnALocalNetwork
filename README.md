@@ -20,7 +20,7 @@ To run the sample, you will need a macOS device to operate as the server, and tw
 
 ## Configure the Sample Code Project
 
-Apps using Local Push Connectivity require the [App Push Provider entitlement](https://developer.apple.com/contact/request/network-extension-app-push-provider) entitlement.
+Apps using Local Push Connectivity require the [App Push Provider entitlement](https://developer.apple.com/contact/request/local-push-connectivity) entitlement.
 
 After receiving the entitlement:
 

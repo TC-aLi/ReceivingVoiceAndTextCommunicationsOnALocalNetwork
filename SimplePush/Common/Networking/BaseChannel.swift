@@ -196,4 +196,10 @@ class BaseChannel {
     public func requestPublisher<Message: Codable>(message: Message) -> (requestIdentifier: UInt32, publisher: AnyPublisher<Bool, Swift.Error>) {
         networkSession.requestPublisher(message: message)
     }
+    
+    // MARK: - Connection Health
+    
+    public func checkConnectionHealth() {
+        heartbeatMonitor.evaluate()
+    }
 }

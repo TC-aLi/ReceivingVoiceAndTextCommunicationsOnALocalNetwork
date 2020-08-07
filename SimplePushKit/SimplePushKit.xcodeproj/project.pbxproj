@@ -25,7 +25,6 @@
 		48B5C05F2437CFB300DBA7C9 /* KeyCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B5C05E2437CFB300DBA7C9 /* KeyCodable.swift */; };
 		48B5C0632437D0F300DBA7C9 /* Invite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B5C0622437D0F300DBA7C9 /* Invite.swift */; };
 		48B5C06B2437DA6400DBA7C9 /* RequestResponseSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B5C06A2437DA6400DBA7C9 /* RequestResponseSession.swift */; };
-		48B83C6A244A4AFA00600EC7 /* DispatchSource+TimerPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B83C69244A4AFA00600EC7 /* DispatchSource+TimerPublisher.swift */; };
 		48BB37992438C95700D7D7AE /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB37982438C95700D7D7AE /* User.swift */; };
 		48BB379A2438C95700D7D7AE /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB37982438C95700D7D7AE /* User.swift */; };
 		48BB37A22438CA8A00D7D7AE /* TextMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BB37A12438CA8A00D7D7AE /* TextMessage.swift */; };
@@ -71,7 +70,6 @@
 		48B5C05E2437CFB300DBA7C9 /* KeyCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCodable.swift; sourceTree = "<group>"; };
 		48B5C0622437D0F300DBA7C9 /* Invite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Invite.swift; sourceTree = "<group>"; };
 		48B5C06A2437DA6400DBA7C9 /* RequestResponseSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestResponseSession.swift; sourceTree = "<group>"; };
-		48B83C69244A4AFA00600EC7 /* DispatchSource+TimerPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchSource+TimerPublisher.swift"; sourceTree = "<group>"; };
 		48BB37982438C95700D7D7AE /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		48BB37A12438CA8A00D7D7AE /* TextMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextMessage.swift; sourceTree = "<group>"; };
 		48BB37B02438CD7000D7D7AE /* Port.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Port.swift; sourceTree = "<group>"; };
@@ -190,7 +188,6 @@
 			isa = PBXGroup;
 			children = (
 				B146FB052438DE5800DD32B5 /* Dictionary+Mutation.swift */,
-				48B83C69244A4AFA00600EC7 /* DispatchSource+TimerPublisher.swift */,
 				484F2B2F24441DB800445692 /* Publisher+DropNil.swift */,
 				48769A1A24398A6E00314A49 /* Publisher+Unfailable.swift */,
 				B1EFC9A2244F2D60004CB381 /* Logger.swift */,
@@ -376,7 +373,6 @@
 				484F2B3024441DB800445692 /* Publisher+DropNil.swift in Sources */,
 				4860EEC3246496510009A323 /* LengthPrefixedFramer.swift in Sources */,
 				B146FB072438DE5800DD32B5 /* Dictionary+Mutation.swift in Sources */,
-				48B83C6A244A4AFA00600EC7 /* DispatchSource+TimerPublisher.swift in Sources */,
 				48B5C06B2437DA6400DBA7C9 /* RequestResponseSession.swift in Sources */,
 				48B5C05B2437C62800DBA7C9 /* NetworkSession.swift in Sources */,
 				48B5C0632437D0F300DBA7C9 /* Invite.swift in Sources */,
@@ -392,6 +388,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 11AD04126328586987D2CD5F /* SampleCode.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -406,6 +403,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.SimplePushKit${SAMPLE_CODE_DISAMBIGUATOR}";
 				PRODUCT_NAME = SimplePushKit;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -415,7 +413,6 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "x86_64 i386";
 			};
 			name = Debug;
 		};
@@ -423,6 +420,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 11AD04126328586987D2CD5F /* SampleCode.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -445,7 +443,6 @@
 				SUPPORTED_PLATFORMS = macosx;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "x86_64 i386";
 			};
 			name = Release;
 		};
@@ -565,7 +562,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";

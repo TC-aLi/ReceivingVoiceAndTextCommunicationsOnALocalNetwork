@@ -70,7 +70,7 @@ public enum ConnectionOptions {
             public var options: NWProtocolTLS.Options {
                 let options = NWProtocolTLS.Options()
                 
-                sec_protocol_options_set_verify_block(options.securityProtocolOptions, { secProtocolMetadata, secTrust, secProtocolVerifyComplete in
+                sec_protocol_options_set_verify_block(options.securityProtocolOptions, { [self] secProtocolMetadata, secTrust, secProtocolVerifyComplete in
                     let trust = sec_trust_copy_ref(secTrust).takeRetainedValue()
                     
                     guard let serverCertificate = SecTrustGetCertificateAtIndex(trust, 0) else {
@@ -80,9 +80,9 @@ public enum ConnectionOptions {
                     
                     let serverPublicKey = SecCertificateCopyKey(serverCertificate)
                     let serverPublicKeyData = SecKeyCopyExternalRepresentation(serverPublicKey!, nil)! as Data
-                    let keyHash = self.cryptoKitSHA256(data: serverPublicKeyData)
+                    let keyHash = cryptoKitSHA256(data: serverPublicKeyData)
                     
-                    if keyHash == self.publicKeyHash {
+                    if keyHash == publicKeyHash {
                         // Presented certificate matches the pinned cert.
                         secProtocolVerifyComplete(true)
                     } else {

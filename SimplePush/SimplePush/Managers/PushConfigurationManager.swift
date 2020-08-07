@@ -37,19 +37,19 @@ class PushConfigurationManager: NSObject {
         SettingsManager.shared.hostSSIDPublisher
             .dropFirst()
             .receive(on: dispatchQueue)
-            .compactMap { settings -> AnyPublisher<Result<NEAppPushManager?, Swift.Error>, Never>? in
+            .compactMap { [self] settings -> AnyPublisher<Result<NEAppPushManager?, Swift.Error>, Never>? in
                 var publisher: AnyPublisher<NEAppPushManager?, Swift.Error>?
                 
                 if !settings.ssid.isEmpty && !settings.host.isEmpty {
                     // Create a new push manager or update the existing instance with the new values from settings.
-                    publisher = self.save(pushManager: self.pushManager ?? NEAppPushManager(), with: settings)
+                    publisher = save(pushManager: pushManager ?? NEAppPushManager(), with: settings)
                         .flatMap { pushManager in
                             // Reload the push manager.
                             pushManager.load()
                         }
                         .map { $0 }
                         .eraseToAnyPublisher()
-                } else if let pushManager = self.pushManager {
+                } else if let pushManager = pushManager {
                     // Remove the push manager and map its value to nil to indicate removal of the push manager to the downstream subscribers.
                     publisher = pushManager.remove()
                         .map { _ in nil }
@@ -60,16 +60,16 @@ class PushConfigurationManager: NSObject {
             }
             .switchToLatest()
             .receive(on: dispatchQueue)
-            .sink { result in
+            .sink { [self] result in
                 switch result {
                 case .success(let pushManager):
                     if let pushManager = pushManager {
-                        self.prepare(pushManager: pushManager)
+                        prepare(pushManager: pushManager)
                     } else {
-                        self.cleanup()
+                        cleanup()
                     }
                 case .failure(let error):
-                    self.logger.log("\(error)")
+                    logger.log("\(error)")
                 }
             }.store(in: &cancellables)
     }
@@ -80,17 +80,17 @@ class PushConfigurationManager: NSObject {
                 pushManagers.first
             }
             .receive(on: dispatchQueue)
-            .sink(receiveCompletion: { _ in
-                self.initialLoadCancellable = nil
-            }, receiveValue: { pushManager in
-                self.prepare(pushManager: pushManager)
+            .sink(receiveCompletion: { [self] _ in
+                initialLoadCancellable = nil
+            }, receiveValue: { [self] pushManager in
+                prepare(pushManager: pushManager)
             })
     }
     
     private func save(pushManager: NEAppPushManager, with settings: Settings) -> AnyPublisher<NEAppPushManager, Swift.Error> {
         pushManager.matchSSIDs = [settings.ssid]
-        pushManager.localizedDescription = self.pushManagerDescription
-        pushManager.providerBundleIdentifier = self.pushProviderBundleIdentifier
+        pushManager.localizedDescription = pushManagerDescription
+        pushManager.providerBundleIdentifier = pushProviderBundleIdentifier
         pushManager.delegate = self
         pushManager.isEnabled = true
         
@@ -153,8 +153,8 @@ extension NEAppPushManager {
     }
     
     func load() -> AnyPublisher<NEAppPushManager, Error> {
-        Future { promise in
-            self.loadFromPreferences { error in
+        Future { [self] promise in
+            loadFromPreferences { error in
                 if let error = error {
                     promise(.failure(error))
                     return
@@ -166,8 +166,8 @@ extension NEAppPushManager {
     }
     
     func save() -> AnyPublisher<NEAppPushManager, Error> {
-        Future { promise in
-            self.saveToPreferences { error in
+        Future { [self] promise in
+            saveToPreferences { error in
                 if let error = error {
                     promise(.failure(error))
                     return
@@ -179,8 +179,8 @@ extension NEAppPushManager {
     }
     
     func remove() -> AnyPublisher<NEAppPushManager, Error> {
-        Future { promise in
-            self.removeFromPreferences(completionHandler: { error in
+        Future { [self] promise in
+            removeFromPreferences(completionHandler: { error in
                 if let error = error {
                     promise(.failure(error))
                     return

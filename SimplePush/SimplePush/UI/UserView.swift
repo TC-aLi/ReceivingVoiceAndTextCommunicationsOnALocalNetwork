@@ -26,7 +26,7 @@ struct UserView: View {
                     Text("Contact")
                         .foregroundColor(Color("Colors/SecondaryText"))
                         .font(.subheadline)
-                    Text(self.viewModel.user.deviceName)
+                    Text(viewModel.user.deviceName)
                         .foregroundColor(Color("Colors/PrimaryText"))
                         .font(.title2)
                         .fontWeight(.semibold)
@@ -39,9 +39,9 @@ struct UserView: View {
                         .foregroundColor(Color("Colors/PrimaryText"))
                         .font(.subheadline)
                 }
-                Button(action: {
+                Button {
                     viewModel.presentedView = .messaging(viewModel.user, nil)
-                }) {
+                } label: {
                     Image(systemName: "message")
                         .font(.system(size: 30.0))
                 }
@@ -57,9 +57,9 @@ struct UserView: View {
     }
     
     func contentView(height: CGFloat) -> some View {
-        Button(action: {
-            self.viewModel.phoneButtonDidPress()
-        }) {
+        Button {
+            viewModel.phoneButtonDidPress()
+        } label: {
             Circle()
                 .fill(callButtonColor(for: viewModel.callState))
             .overlay(

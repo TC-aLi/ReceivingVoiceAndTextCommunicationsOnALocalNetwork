@@ -90,7 +90,7 @@ class UserViewModel: ObservableObject {
             .store(in: &cancellables)
         
         // Observe user directory changes to update the UI with a user's most recent device name.
-        UserManager.shared.userAvailabilityPublisher(for: self.user)
+        UserManager.shared.userAvailabilityPublisher(for: user)
             .sink { [weak self] userAvailability, user in
                 self?.user = user
                 self?.userAvailability = userAvailability
@@ -206,9 +206,9 @@ class UserViewModel: ObservableObject {
     
     func updateActionsButtonsForConnectedUser(connectedUser: User) {
         if connectedUser.id == user.id {
-            self.disableCallActions = false
+            disableCallActions = false
         } else {
-            self.disableCallActions = true
+            disableCallActions = true
         }
     }
     

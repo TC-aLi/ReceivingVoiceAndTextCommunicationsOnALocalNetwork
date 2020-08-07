@@ -52,7 +52,7 @@ class CallManager: NSObject {
         return CXProvider(configuration: configuration)
     }()
     
-    private let dispatchQueue = DispatchQueue(label: "CallManager.dispatchQueue", qos: .default)
+    private let dispatchQueue = DispatchQueue(label: "CallManager.dispatchQueue")
     private let callController = CXCallController()
     private var currentCallUUID: UUID?
     private var remoteUser: User?
@@ -72,20 +72,20 @@ class CallManager: NSObject {
         // Observe when state updates.
         nextStatePublisher
             .receive(on: dispatchQueue)
-            .sink { state in
+            .sink { [self] state in
                 self.state = state
                 
                 switch state {
                 case .connecting:
-                    self.logger.log("State changed to connecting")
+                    logger.log("State changed to connecting")
                 case .connected(let user):
-                    self.logger.log("State changed to connected to - \(user.deviceName)")
+                    logger.log("State changed to connected to - \(user.deviceName)")
                 case .disconnecting(let reason):
-                    self.logger.log("State changed to disconnecting with reason - \(reason)")
-                    self.remoteUser = nil
-                    self.callActionSubject.send(.disconnect)
+                    logger.log("State changed to disconnecting with reason - \(reason)")
+                    remoteUser = nil
+                    callActionSubject.send(.disconnect)
                 case .disconnected:
-                    self.logger.log("State changed to disconnected")
+                    logger.log("State changed to disconnected")
                 }
             }
             .store(in: &cancellables)
@@ -97,20 +97,20 @@ class CallManager: NSObject {
                 message as? CallAction
             }
             .receive(on: dispatchQueue)
-            .sink { callAction in
-                guard let remoteUser = self.remoteUser else {
+            .sink { [self] callAction in
+                guard let remoteUser = remoteUser else {
                     return
                 }
                 
-                self.logger.log("Received remote CallAction of \(callAction.action) from \(remoteUser.deviceName)")
+                logger.log("Received remote CallAction of \(callAction.action) from \(remoteUser.deviceName)")
                 
                 switch callAction.action {
                 case .connect:
-                    self.callActionSubject.send(.broadcastAudio)
+                    callActionSubject.send(.broadcastAudio)
                 case .hangup:
-                    self.remoteEndCall(reason: .remoteEnded)
+                    remoteEndCall(reason: .remoteEnded)
                 case .unavailable:
-                    self.remoteEndCall(reason: .unanswered)
+                    remoteEndCall(reason: .unanswered)
                 }
             }
             .store(in: &cancellables)
@@ -127,16 +127,16 @@ class CallManager: NSObject {
                 }
             }
             .switchToLatest()
-            .sink { controlChannelState in
-                self.logger.log("Ending the call because control channel state moved to \(controlChannelState) while in a call")
-                self.remoteEndCall(reason: .failed)
+            .sink { [self] controlChannelState in
+                logger.log("Ending the call because control channel state moved to \(controlChannelState) while in a call")
+                remoteEndCall(reason: .failed)
             }
             .store(in: &cancellables)
         
         // Observe when the user answers the call.
         callIsAnsweredSubject
-            .sink { isAnswered in
-                guard isAnswered, let remoteUser = self.remoteUser else {
+            .sink { [self] isAnswered in
+                guard isAnswered, let remoteUser = remoteUser else {
                     return
                 }
                 
@@ -153,9 +153,9 @@ class CallManager: NSObject {
         // Inform CallKit when a the remoteUser device name changes.
         updatedRemoteUserPublisher
             .receive(on: dispatchQueue)
-            .sink { remoteUser in
+            .sink { [self] remoteUser in
                 self.remoteUser = remoteUser
-                self.updateCallHandle(displayName: remoteUser.deviceName)
+                updateCallHandle(displayName: remoteUser.deviceName)
             }
             .store(in: &cancellables)
     }
@@ -255,52 +255,52 @@ class CallManager: NSObject {
     // MARK: - Actions
     
     func sendCall(to remoteUser: User) {
-        dispatchQueue.async {
-            guard self.state == .disconnected else {
+        dispatchQueue.async { [self] in
+            guard state == .disconnected else {
                 return
             }
             
-            self.callRoleSubject.send(.sender)
+            callRoleSubject.send(.sender)
             self.remoteUser = remoteUser
             
             let routing = Routing(sender: UserManager.shared.currentUser, receiver: remoteUser)
             let invite = Invite(routing: routing)
             ControlChannel.shared.request(message: invite)
             
-            self.callActionSubject.send(.connect)
-            self.logger.log("Sending CXStartCallAction transaction to CallKit")
+            callActionSubject.send(.connect)
+            logger.log("Sending CXStartCallAction transaction to CallKit")
             
             let callUUID = UUID()
-            self.currentCallUUID = callUUID
+            currentCallUUID = callUUID
             let startCallAction = CXStartCallAction(call: callUUID, handle: CXHandle(type: .generic, value: remoteUser.deviceName))
             startCallAction.isVideo = false
             let transaction = CXTransaction(action: startCallAction)
             
-            self.requestCallKitTransaction(transaction)
+            requestCallKitTransaction(transaction)
         }
     }
     
     func receiveCall(from invite: Invite) {
-        dispatchQueue.async {
-            guard self.state == .disconnected else {
+        dispatchQueue.async { [self] in
+            guard state == .disconnected else {
                 return
             }
             
-            self.callRoleSubject.send(.receiver)
-            self.remoteUser = invite.routing.sender
-            self.callActionSubject.send(.connect)
+            callRoleSubject.send(.receiver)
+            remoteUser = invite.routing.sender
+            callActionSubject.send(.connect)
             
             let update = CXCallUpdate()
-            update.remoteHandle = CXHandle(type: .generic, value: self.remoteUser!.deviceName)
+            update.remoteHandle = CXHandle(type: .generic, value: remoteUser!.deviceName)
             update.hasVideo = false
             
             let callUUID = UUID()
-            self.currentCallUUID = callUUID
+            currentCallUUID = callUUID
             
-            self.provider.reportNewIncomingCall(with: callUUID, update: update) { error in
+            provider.reportNewIncomingCall(with: callUUID, update: update) { [self] error in
                 if let error = error {
-                    self.logger.log("Report incoming call failed: \(error)")
-                    self.cleanUpActiveCall(reason: .unavailable)
+                    logger.log("Report incoming call failed: \(error)")
+                    cleanUpActiveCall(reason: .unavailable)
                     return
                 }
             }
@@ -308,15 +308,15 @@ class CallManager: NSObject {
     }
     
     func endCall() {
-        dispatchQueue.async {
-            guard let callUUID = self.currentCallUUID else {
-                self.logger.log("Unable to end call because currentCallUUID is nil")
+        dispatchQueue.async { [self] in
+            guard let callUUID = currentCallUUID else {
+                logger.log("Unable to end call because currentCallUUID is nil")
                 return
             }
             
             let action = CXEndCallAction(call: callUUID)
             let transaction = CXTransaction(action: action)
-            self.requestCallKitTransaction(transaction)
+            requestCallKitTransaction(transaction)
         }
     }
     
@@ -330,9 +330,9 @@ class CallManager: NSObject {
     }
     
     private func requestCallKitTransaction(_ transaction: CXTransaction) {
-        callController.request(transaction) { error in
+        callController.request(transaction) { [self] error in
             if let error = error {
-                self.logger.log("Error requesting CallKit transaction - \(error)")
+                logger.log("Error requesting CallKit transaction - \(error)")
             }
         }
     }
@@ -342,12 +342,12 @@ class CallManager: NSObject {
         
         let update = CXCallUpdate()
         update.remoteHandle = CXHandle(type: .generic, value: displayName)
-        self.provider.reportCall(with: currentCallUUID, updated: update)
+        provider.reportCall(with: currentCallUUID, updated: update)
     }
     
     private func remoteEndCall(reason: CXCallEndedReason) {
-        dispatchQueue.async {
-            guard let currentCallUUID = self.currentCallUUID else {
+        dispatchQueue.async { [self] in
+            guard let currentCallUUID = currentCallUUID else {
                 return
             }
             
@@ -361,9 +361,9 @@ class CallManager: NSObject {
                 internalReason = .callFailed
             }
             
-            self.logger.log("Reporting remote end call to CallKit")
-            self.provider.reportCall(with: currentCallUUID, endedAt: nil, reason: reason)
-            self.cleanUpActiveCall(reason: internalReason)
+            logger.log("Reporting remote end call to CallKit")
+            provider.reportCall(with: currentCallUUID, endedAt: nil, reason: reason)
+            cleanUpActiveCall(reason: internalReason)
         }
     }
 }
@@ -384,17 +384,17 @@ extension CallManager: CXProviderDelegate {
         logger.log("Provider perform end call action")
         precondition(callRoleSubject.value != nil, "Call role is nil, this shouldn't have happened")
         
-        dispatchQueue.async {
-            switch self.state {
+        dispatchQueue.async { [self] in
+            switch state {
             case .connecting:
-                switch self.callRoleSubject.value! {
+                switch callRoleSubject.value! {
                 case .sender:
-                    self.cleanUpActiveCall(reason: .hungUp)
+                    cleanUpActiveCall(reason: .hungUp)
                 case .receiver:
-                    self.cleanUpActiveCall(reason: .unavailable)
+                    cleanUpActiveCall(reason: .unavailable)
                 }
             case .connected:
-                self.cleanUpActiveCall(reason: .hungUp)
+                cleanUpActiveCall(reason: .hungUp)
             case .disconnected, .disconnecting:
                 break
             }

@@ -18,7 +18,6 @@ public class HeartbeatMonitor {
     private let dispatchQueue = DispatchQueue(label: "HeartbeatMonitor.dispatchQueue")
     private var isRunning = false
     private var lastCheckinTime: DispatchTime = .now()
-    private lazy var timerPublisher = DispatchSource.TimerPublisher(deadline: .now(), repeating: interval, queue: dispatchQueue).share().makeConnectable()
     private var cancellables = Set<AnyCancellable>()
     private let logger: Logger
     
@@ -60,25 +59,24 @@ public class HeartbeatMonitor {
             }
             .store(in: &self.cancellables)
             
-            // Observe the timerPublisher, compare the current time to the lastCheckinTime and disconnect the session if the difference between now
-            // and lastCheckinTime exceeds the interval.
-            self.timerPublisher
-            .autoconnect()
-            .sink { [weak self] now in
-                guard let self = self else {
-                    return
-                }
-                
-                let expirationTime = self.lastCheckinTime.advanced(by: self.interval)
-                
-                if now >= expirationTime {
-                    self.logger.log("Heartbeat didn't check in within the interval of \(self.interval), calling network session disconnect.")
-                    session.disconnect()
-                }
-            }
-            .store(in: &self.cancellables)
-            
             self.isRunning = true
+        }
+    }
+    
+    // Compare the current time to the lastCheckinTime and disconnect the session if the difference between now
+    // and lastCheckinTime exceeds the interval.
+    public func evaluate() {
+        dispatchQueue.async { [weak self] in
+            guard let self = self, self.isRunning else {
+                return
+            }
+            
+            let expirationTime = self.lastCheckinTime.advanced(by: self.interval)
+            
+            if .now() >= expirationTime {
+                self.logger.log("Heartbeat didn't check in within the interval of \(self.interval), calling network session disconnect.")
+                self.session?.disconnect()
+            }
         }
     }
     

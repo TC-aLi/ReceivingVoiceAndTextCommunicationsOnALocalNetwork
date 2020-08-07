@@ -59,7 +59,7 @@ public class LengthPrefixedFramer: NWProtocolFramerImplementation {
             framer.writeOutput(data: headerData)
             try framer.writeOutputNoCopy(length: messageLength)
         } catch let error {
-            self.logger.log("Error while writing output: \(error)")
+            logger.log("Error while writing output: \(error)")
         }
     }
     

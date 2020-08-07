@@ -72,7 +72,7 @@ public class RequestResponseSession: NetworkSession {
         
         let cancellable = publisher
         .receive(on: dispatchQueue)
-        .sink(receiveCompletion: { [weak self] result in
+        .sink { [weak self] result in
             self?.requestCancellables[id] = nil
             
             switch result {
@@ -81,7 +81,7 @@ public class RequestResponseSession: NetworkSession {
             case .failure(let error):
                 completion?(.failure(error))
             }
-        }) { _ in
+        } receiveValue: { _ in
             // noop
         }
         

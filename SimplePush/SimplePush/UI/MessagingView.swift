@@ -16,21 +16,21 @@ struct MessagingView: View {
     var body: some View {
         NavigationView {
             List {
-                Section(header: self.sectionHeader(message: viewModel.message)) {
-                    TextField(self.viewModel.message == nil ? "Message" : "Reply", text: self.$viewModel.reply)
+                Section(header: sectionHeader(message: viewModel.message)) {
+                    TextField(viewModel.message == nil ? "Message" : "Reply", text: $viewModel.reply)
                         .keyboardType(.default)
                 }
             }
             .listStyle(InsetGroupedListStyle())
             .environment(\.defaultMinListRowHeight, 50.0)
-            .navigationBarTitle(self.viewModel.message == nil ? "New Message" : "Reply", displayMode: .inline)
+            .navigationBarTitle(viewModel.message == nil ? "New Message" : "Reply", displayMode: .inline)
             .navigationBarItems(leading: Button(action: {
                 presenter?.dismiss()
             }, label: {
                 Text("Done")
                     .fontWeight(.medium)
             }), trailing: Button(action: {
-                self.viewModel.sendMessage()
+                viewModel.sendMessage()
                 presenter?.dismiss()
             }, label: {
                 Text("Send")

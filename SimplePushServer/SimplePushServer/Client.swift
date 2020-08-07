@@ -31,7 +31,7 @@ class Client {
     @Published private(set) var notificationChannelState: State = .disconnected
     @Published private(set) var controlChannelState: State = .disconnected
     private(set) lazy var messagesPublisher = messagesSubject.eraseToAnyPublisher()
-    private let dispatchQueue = DispatchQueue(label: "Client.dispatchQueue", qos: .default)
+    private let dispatchQueue = DispatchQueue(label: "Client.dispatchQueue")
     private var messagesSubject = PassthroughSubject<Codable, Never>()
     private var notificationIsResponsive = CurrentValueSubject<Bool, Never>(false)
     private var notificationNetworkSessionState = CurrentValueSubject<NetworkSession.State, Never>(.disconnected)

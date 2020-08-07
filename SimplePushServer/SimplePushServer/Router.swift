@@ -10,7 +10,7 @@ import Combine
 import SimplePushKit
 
 class Router {
-    private let dispatchQueue = DispatchQueue(label: "Router.dispatchQueue", qos: .default)
+    private let dispatchQueue = DispatchQueue(label: "Router.dispatchQueue")
     private var cancellables = [UUID: Set<AnyCancellable>]()
     private var clients = [UUID: Client]()
     private var calls = [Call]()
@@ -19,15 +19,15 @@ class Router {
     init() {}
     
     func register(user: User, session: NetworkSession, type: Channel.ChannelType) {
-        dispatchQueue.async {
-            let client = self.clients.get(user.uuid, insert: Client(user: user))
+        dispatchQueue.async { [self] in
+            let client = clients.get(user.uuid, insert: Client(user: user))
             
-            if self.cancellables[user.uuid] == nil {
-                self.cancellables[user.uuid] = []
+            if cancellables[user.uuid] == nil {
+                cancellables[user.uuid] = []
                 
                 client.$notificationChannelState
                 .dropFirst()
-                .receive(on: self.dispatchQueue)
+                .receive(on: dispatchQueue)
                 .sink { [weak self] state in
                     if state == .disconnected {
                         // The notification channel has disconnected so cancel any pending calls.
@@ -39,11 +39,11 @@ class Router {
                     // Publish the updated user directory for all users.
                     self?.publishDirectory()
                 }
-                .store(in: &self.cancellables[user.uuid]!)
+                .store(in: &cancellables[user.uuid]!)
                 
                 client.$controlChannelState
                 .dropFirst()
-                .receive(on: self.dispatchQueue)
+                .receive(on: dispatchQueue)
                 .sink { [weak self] state in
                     if state == .disconnected {
                         // The control channel has disconnected so cancel any pending or active calls.
@@ -52,30 +52,26 @@ class Router {
                         }
                     }
                 }
-                .store(in: &self.cancellables[user.uuid]!)
+                .store(in: &cancellables[user.uuid]!)
                 
                 client.messagesPublisher
-                .receive(on: self.dispatchQueue)
+                .receive(on: dispatchQueue)
                 .sink { [weak self] message in
-                    guard let self = self else {
-                        return
-                    }
-                    
-                    self.route(message: message, from: client)
+                    self?.route(message: message, from: client)
                 }
-                .store(in: &self.cancellables[user.uuid]!)
+                .store(in: &cancellables[user.uuid]!)
                 
                 client.$user
-                .receive(on: self.dispatchQueue)
-                .sink { _ in
-                    self.publishDirectory()
+                .receive(on: dispatchQueue)
+                .sink { [self] _ in
+                    publishDirectory()
                 }
-                .store(in: &self.cancellables[user.uuid]!)
+                .store(in: &cancellables[user.uuid]!)
             }
             
             client.user = user
             client.setSession(session, type: type)
-            self.publishDirectory()
+            publishDirectory()
         }
     }
     
