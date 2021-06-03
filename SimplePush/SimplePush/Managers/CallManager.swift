@@ -91,7 +91,7 @@ class CallManager: NSObject {
             .store(in: &cancellables)
         
         // Observe call statuses sent from the remoteUser when in an active call. Call status messages signal actions to perform,
-        // such as connect, or hang up.
+        // such as connect or hang up.
         ControlChannel.shared.messagePublisher
             .compactMap { message -> CallAction? in
                 message as? CallAction
@@ -145,7 +145,7 @@ class CallManager: NSObject {
             }
             .store(in: &cancellables)
         
-        // Ensures sending of a hang up status to the remoteUser before fulfilling a CallKit action that could potentially terminate the call.
+        // Ensures sending of a hangup status to the remoteUser before fulfilling a CallKit action that could potentially terminate the call.
         shouldFullfillHangUpPublisher
             .subscribe(callShouldEndSubject)
             .store(in: &cancellables)
@@ -214,7 +214,7 @@ class CallManager: NSObject {
             .eraseToAnyPublisher()
     }()
     
-    // Ensures that a hang up status is sent to the remoteUser before fulfilling a CallKit action that could potentially terminate the CallKit call.
+    // Ensures that a hangup status is sent to the remoteUser before fulfilling a CallKit action that could potentially terminate the CallKit call.
     private lazy var shouldFullfillHangUpPublisher: AnyPublisher<Bool, Never> = {
         $state
             .compactMap { state -> (TerminatedReason, User)? in
@@ -246,7 +246,7 @@ class CallManager: NSObject {
                 return publisher.unfailable()
             }
             .map { _ in
-                // Signal that it's okay to hangup whether sending the call status to the remoteUser succeeded or failed.
+                // Signal that it's okay to hang up whether sending the call status to the remoteUser succeeded or failed.
                 true
             }
             .eraseToAnyPublisher()
@@ -401,7 +401,7 @@ extension CallManager: CXProviderDelegate {
         }
 
         // Wait until `shouldFulfillHangupSubject` produces a value that indicates it's okay to end the call, otherwise the app process could
-        // terminated before the hangup was sent to the `remoteUser`.
+        // terminate before the hangup was sent to the `remoteUser`.
         callHangupCancellable = callShouldEndSubject
         .sink(receiveValue: { [weak self] _ in
             guard let self = self else {

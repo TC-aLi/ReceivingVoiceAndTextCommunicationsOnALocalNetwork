@@ -28,7 +28,7 @@ class SimplePushProvider: NEAppPushProvider {
             }
             .store(in: &cancellables)
         
-        // Observe notification channel messages and alert user when receiving a new text message or call invite.
+        // Observe notification channel messages and alert the user when receiving a new text message or call invite.
         channel.messagePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
@@ -56,26 +56,23 @@ class SimplePushProvider: NEAppPushProvider {
                 
                 let user = User(uuid: settings.uuid, deviceName: settings.deviceName)
                 self.channel.register(user)
-                self.channel.setHost(settings.host)
+                self.channel.setHost(settings.pushManagerSettings.host)
             }
             .store(in: &cancellables)
     }
     
     // MARK: - NEAppPushProvider Life Cycle
     
-    override func start(completionHandler: @escaping (Error?) -> Void) {
+    override func start() {
         logger.log("Started")
-        
+
         guard let host = providerConfiguration?["host"] as? String else {
             logger.log("Provider configuration is missing value for key: `host`")
-            completionHandler(nil)
             return
         }
-        
+
         channel.setHost(host)
         channel.connect()
-        
-        completionHandler(nil)
     }
     
     override func stop(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {

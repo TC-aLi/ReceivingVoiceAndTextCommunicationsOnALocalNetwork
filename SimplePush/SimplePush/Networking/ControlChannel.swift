@@ -18,7 +18,7 @@ class ControlChannel: BaseChannel {
         
         SettingsManager.shared.settingsPublisher
         .sink { [self] settings in
-            setHost(settings.host)
+            setHost(settings.pushManagerSettings.host)
         }
         .store(in: &cancellables)
     }

@@ -80,7 +80,7 @@ class UserViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
-        // Observe internal call state, control channel state, and this device's role in the currently active call
+        // Observe the internal call state, control channel state, and this device's role in the currently active call
         // and set the appropriate help text.
         helpTextPublisher
             .receive(on: DispatchQueue.main)
@@ -150,7 +150,7 @@ class UserViewModel: ObservableObject {
             .eraseToAnyPublisher()
     }()
     
-    // Observes the state of the call manager and returns a new publisher that will either fire immediately or produce a delayed state change. The
+    // Observes the state of the call manager and returns a new publisher that either fires immediately or produces a delayed state change. The
     // purpose of the delay is to allow the UI to temporarily display the call termination reason before resetting the UI to a ready state.
     private lazy var callStatePublisher: AnyPublisher<CallManager.State, Never> = {
         CallManager.shared.$state

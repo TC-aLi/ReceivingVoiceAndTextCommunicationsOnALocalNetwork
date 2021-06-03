@@ -27,30 +27,35 @@ class PushConfigurationManager: NSObject {
     private let pushProviderBundleIdentifier = "com.example.apple-samplecode.SimplePush.SimplePushProvider"
     private let pushManagerIsActiveSubject = CurrentValueSubject<Bool, Never>(false)
     private var pushManagerIsActiveCancellable: AnyCancellable?
-    private var initialLoadCancellable: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
     
     override init() {
         super.init()
         
         // Create, update, or delete the push manager when SettingsManager.hostSSIDPublisher produces a new value.
-        SettingsManager.shared.hostSSIDPublisher
-            .dropFirst()
+        SettingsManager.shared.settingsDidWritePublisher
+            .compactMap { settings in
+                settings.pushManagerSettings
+            }
+            .removeDuplicates()
             .receive(on: dispatchQueue)
-            .compactMap { [self] settings -> AnyPublisher<Result<NEAppPushManager?, Swift.Error>, Never>? in
+            .compactMap { [self] pushManagerSettings -> AnyPublisher<Result<NEAppPushManager?, Swift.Error>, Never>? in
                 var publisher: AnyPublisher<NEAppPushManager?, Swift.Error>?
                 
-                if !settings.ssid.isEmpty && !settings.host.isEmpty {
+                if !pushManagerSettings.isEmpty {
                     // Create a new push manager or update the existing instance with the new values from settings.
-                    publisher = save(pushManager: pushManager ?? NEAppPushManager(), with: settings)
-                        .flatMap { pushManager in
+                    logger.log("Saving new push manager configuration.")
+                    publisher = save(pushManager: pushManager ?? NEAppPushManager(), with: pushManagerSettings)
+                        .flatMap { pushManager -> AnyPublisher<NEAppPushManager, Error> in
                             // Reload the push manager.
-                            pushManager.load()
+                            logger.log("Loading new push manager configuration.")
+                            return pushManager.load()
                         }
                         .map { $0 }
                         .eraseToAnyPublisher()
                 } else if let pushManager = pushManager {
                     // Remove the push manager and map its value to nil to indicate removal of the push manager to the downstream subscribers.
+                    logger.log("Removing push manager configuration.")
                     publisher = pushManager.remove()
                         .map { _ in nil }
                         .eraseToAnyPublisher()
@@ -75,41 +80,77 @@ class PushConfigurationManager: NSObject {
     }
     
     func initialize() {
-        initialLoadCancellable = NEAppPushManager.loadAll()
-            .compactMap { pushManagers -> NEAppPushManager? in
-                pushManagers.first
+        logger.log("Loading existing push manager.")
+        
+        // It is important to call loadAllFromPreferences as early as possible during app initialization in order to set the delegate on your
+        // NEAppPushManagers. This allows your NEAppPushManagers to receive an incoming call.
+        NEAppPushManager.loadAllFromPreferences { managers, error in
+            if let error = error {
+                self.logger.log("Failed to load all managers from preferences: \(error)")
+                return
             }
-            .receive(on: dispatchQueue)
-            .sink(receiveCompletion: { [self] _ in
-                initialLoadCancellable = nil
-            }, receiveValue: { [self] pushManager in
-                prepare(pushManager: pushManager)
-            })
+            
+            guard let manager = managers?.first else {
+                return
+            }
+            
+            // The manager's delegate must be set synchronously in this closure in order to avoid race conditions when the app launches in response
+            // to an incoming call.
+            manager.delegate = self
+            
+            self.dispatchQueue.async {
+                self.prepare(pushManager: manager)
+            }
+        }
     }
     
-    private func save(pushManager: NEAppPushManager, with settings: Settings) -> AnyPublisher<NEAppPushManager, Swift.Error> {
-        pushManager.matchSSIDs = [settings.ssid]
+    private func prepare(pushManager: NEAppPushManager) {
+        self.pushManager = pushManager
+        
+        if pushManager.delegate == nil {
+            pushManager.delegate = self
+        }
+        
+        // Observe changes to the manager's `isActive` property and send the value out on the `pushManagerIsActiveSubject`.
+        pushManagerIsActiveCancellable = NSObject.KeyValueObservingPublisher(object: pushManager, keyPath: \.isActive, options: [.initial, .new])
+        .subscribe(pushManagerIsActiveSubject)
+    }
+    
+    private func save(pushManager: NEAppPushManager, with pushManagerSettings: Settings.PushManagerSettings) -> AnyPublisher<NEAppPushManager, Swift.Error> {
         pushManager.localizedDescription = pushManagerDescription
         pushManager.providerBundleIdentifier = pushProviderBundleIdentifier
         pushManager.delegate = self
         pushManager.isEnabled = true
         
-        // The provider configuration passes global variables; don't put user specific info in here (which could expose sensitive user info
-        // when running on a shared iPad).
+        // The provider configuration passes global variables; don't put user-specific info in here (which could expose sensitive user info when
+        // running on a shared iPad).
         pushManager.providerConfiguration = [
-            "host": settings.host
+            "host": pushManagerSettings.host
         ]
         
-        return pushManager.save()
-    }
-    
-    private func prepare(pushManager: NEAppPushManager) {
-        self.pushManager = pushManager
-        pushManager.delegate = self
+        if !pushManagerSettings.ssid.isEmpty {
+            pushManager.matchSSIDs = [pushManagerSettings.ssid]
+        } else {
+            pushManager.matchSSIDs = []
+        }
         
-        // Observe changes to the manager's `isActive` property and send the value out on the `pushManagerIsActiveSubject`.
-        pushManagerIsActiveCancellable = NSObject.KeyValueObservingPublisher(object: pushManager, keyPath: \.isActive, options: [.initial, .new])
-        .subscribe(pushManagerIsActiveSubject)
+        if !pushManagerSettings.mobileCountryCode.isEmpty && !pushManagerSettings.mobileNetworkCode.isEmpty {
+            let privateLTENetwork = NEPrivateLTENetwork()
+            privateLTENetwork.mobileCountryCode = pushManagerSettings.mobileCountryCode
+            privateLTENetwork.mobileNetworkCode = pushManagerSettings.mobileNetworkCode
+            
+            if !pushManagerSettings.trackingAreaCode.isEmpty {
+                privateLTENetwork.trackingAreaCode = pushManagerSettings.trackingAreaCode
+            } else {
+                privateLTENetwork.trackingAreaCode = nil
+            }
+            
+            pushManager.matchPrivateLTENetworks = [privateLTENetwork]
+        } else {
+            pushManager.matchPrivateLTENetworks = []
+        }
+        
+        return pushManager.save()
     }
     
     private func cleanup() {
@@ -134,24 +175,12 @@ extension PushConfigurationManager: NEAppPushDelegate {
         let routing = Routing(sender: sender, receiver: UserManager.shared.currentUser)
         let invite = Invite(routing: routing)
         
-        // Trigger `CallManager` workflow that launches `CallKit` to alert the user to the call.
+        // Trigger `CallManager` workflow which launches `CallKit` to alert the user to the call.
         CallManager.shared.receiveCall(from: invite)
     }
 }
 
 extension NEAppPushManager {
-    static func loadAll() -> AnyPublisher<[NEAppPushManager], Error> {
-        Future { promise in
-            NEAppPushManager.loadAllFromPreferences { managers, error in
-                if let error = error {
-                    promise(.failure(error))
-                    return
-                }
-                promise(.success(managers ?? []))
-            }
-        }.eraseToAnyPublisher()
-    }
-    
     func load() -> AnyPublisher<NEAppPushManager, Error> {
         Future { [self] promise in
             loadFromPreferences { error in

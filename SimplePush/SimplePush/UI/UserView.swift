@@ -65,10 +65,10 @@ struct UserView: View {
             .overlay(
                 Image(systemName: "phone.down")
                     .font(.system(size: height / 2, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color.white)
                     .offset(x: 0.0, y: -1)
                     .rotationEffect(callButtonRotationAngle(for: viewModel.callState))
-                    .animation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 0.0))
+                    .animation(.spring(response: 0.5, dampingFraction: 0.35, blendDuration: 0.0), value: viewModel.callState)
             )
             .frame(width: height, height: height)
         }

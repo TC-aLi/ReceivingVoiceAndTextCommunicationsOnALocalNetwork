@@ -2,7 +2,7 @@
 See LICENSE folder for this sample’s licensing information.
 
 Abstract:
-`TextMessage` represents a text based message sent from one user to another.
+`TextMessage` represents a text-based message sent from one user to another.
 */
 
 import Foundation

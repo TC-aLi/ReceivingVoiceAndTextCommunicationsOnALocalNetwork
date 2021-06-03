@@ -85,12 +85,7 @@ class BaseChannel {
                 case .connect(let host):
                     self.logger.log("Connecting to - \(host)")
                     
-                    let tls = ConnectionOptions.TLS.Client(publicKeyHash: "XTQSZGrHFDV6KdlHsGVhixmbI/Cm2EMsz2FqE2iZoqU=").options
-                    let parameters = NWParameters(tls: tls, tcp: ConnectionOptions.TCP.options)
-                    let protocolFramer = NWProtocolFramer.Options(definition: LengthPrefixedFramer.definition)
-                    parameters.defaultProtocolStack.applicationProtocols.insert(protocolFramer, at: 0)
-                    let connection = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: parameters)
-                    
+                    let connection = self.setupNewConnection(to: host, port: port)
                     self.networkSession.connect(connection: connection)
                 case .disconnect:
                     self.logger.log("Calling network session disconnect")
@@ -100,9 +95,31 @@ class BaseChannel {
             .store(in: &cancellables)
     }
     
+    private func setupNewConnection(to host: String, port: UInt16) -> NWConnection {
+        let tls = ConnectionOptions.TLS.Client(publicKeyHash: "XTQSZGrHFDV6KdlHsGVhixmbI/Cm2EMsz2FqE2iZoqU=").options
+        let parameters = NWParameters(tls: tls, tcp: ConnectionOptions.TCP.options)
+        let protocolFramer = NWProtocolFramer.Options(definition: LengthPrefixedFramer.definition)
+        parameters.defaultProtocolStack.applicationProtocols.insert(protocolFramer, at: 0)
+        let connection = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: parameters)
+        
+        connection.betterPathUpdateHandler = { isBetterPathAvailable in
+            self.logger.log("A better path is available: \(isBetterPathAvailable)")
+            
+            guard isBetterPathAvailable else {
+                return
+            }
+            
+            // Disconnect the network session if a better path is available. In this case, the retry logic in connectActionPublisher
+            // takes care of reestablishing the connection over a viable interface.
+            self.networkSession.disconnect()
+        }
+        
+        return connection
+    }
+    
     // MARK: - Publishers
     
-    // A publisher that signals whether the subscriber should connect to the server or disconnect an existing connection. This publisher takes
+    // A publisher that signals whether the subscriber connects to the server or disconnects an existing connection. This publisher takes
     // multiple variables into account, such as the network session's current state, whether this class's connect/disconnect method resulted
     // from an external call, and whether the host changed.
     private lazy var connectActionPublisher: AnyPublisher<ConnectAction, Never> = {
@@ -119,7 +136,7 @@ class BaseChannel {
                             break
                         }
                         // Disconnect if the host changed and the network session is in the connecting or connected state. When network session's
-                        // state transitions to .disconnected the next case will cause the channel to try to reconnect.
+                        // state transitions to .disconnected, the next case causes the channel to try to reconnect.
                         connect = false
                     case .disconnected:
                         // Connect if the server is currently disconnected (retry).

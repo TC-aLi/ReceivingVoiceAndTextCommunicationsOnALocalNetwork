@@ -2,7 +2,7 @@
 See LICENSE folder for this sample’s licensing information.
 
 Abstract:
-`RequestResponseSession` is concrete subclass of NetworkSession that implements a request/response model.
+A concrete subclass of NetworkSession that implements a request/response model.
 */
 
 import Foundation

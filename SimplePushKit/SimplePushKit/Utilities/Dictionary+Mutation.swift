@@ -2,7 +2,7 @@
 See LICENSE folder for this sample’s licensing information.
 
 Abstract:
-An extention of `Dictionary` that checks for an existing key and creates and stores a new value if the key isn't present.
+An extension of `Dictionary` that checks for an existing key and creates and stores a new value if the key isn't present.
 */
 
 import Foundation

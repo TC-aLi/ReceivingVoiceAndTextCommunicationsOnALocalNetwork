@@ -20,7 +20,7 @@ class MessagingViewModel: ObservableObject {
         self.receiver = receiver
         self.message = message
         
-        // Observes when the message publisher has a message which will place the UI in a "reply" mode.
+        // Observes when the message publisher has a message which places the UI in a reply mode.
         MessagingManager.shared.messagePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in

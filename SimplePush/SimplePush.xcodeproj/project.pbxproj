@@ -20,8 +20,8 @@
 		489648AA24535E7F00BA30B9 /* DirectoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489648A924535E7F00BA30B9 /* DirectoryViewModel.swift */; };
 		489ABFBE24AA88EE00436F6C /* RootViewCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489ABFBD24AA88EE00436F6C /* RootViewCoordinator.swift */; };
 		489F1BF024AA754600040B1D /* SimplePushApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489F1BEF24AA754600040B1D /* SimplePushApp.swift */; };
-		489F1BF324AA791700040B1D /* AppInitializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489F1BF224AA791700040B1D /* AppInitializer.swift */; };
 		489FDFFE247F7E0D00A95279 /* Presenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489FDFFD247F7E0D00A95279 /* Presenter.swift */; };
+		48A26AD525F8106900F46ACC /* CellularProviderInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A26AD425F8106900F46ACC /* CellularProviderInfo.swift */; };
 		48B5C04F2437C15E00DBA7C9 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48B5C04E2437C15E00DBA7C9 /* SettingsView.swift */; };
 		48C0BB9724378CEF002D1244 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48C0BB9624378CEF002D1244 /* NetworkExtension.framework */; };
 		48DF9CA5243B70D1005CABAB /* MessagingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF9CA4243B70D1005CABAB /* MessagingManager.swift */; };
@@ -29,6 +29,7 @@
 		48DF9CA9243B75C3005CABAB /* MessagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF9CA8243B75C3005CABAB /* MessagingView.swift */; };
 		48DF9CAB243B7EB3005CABAB /* MessagingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48DF9CAA243B7EB3005CABAB /* MessagingViewModel.swift */; };
 		B102A175243D0544008D2E9D /* CallManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B102A174243D0544008D2E9D /* CallManager.swift */; };
+		B1056CEB262F194B0016A0BB /* SettingsStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1056CEA262F194B0016A0BB /* SettingsStyle.swift */; };
 		B146FB0A243A147700DD32B5 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B146FB09243A147700DD32B5 /* SettingsManager.swift */; };
 		B146FB11243A33BE00DD32B5 /* ControlChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B146FB10243A33BE00DD32B5 /* ControlChannel.swift */; };
 		B146FB13243A3A9700DD32B5 /* BaseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B146FB12243A3A9700DD32B5 /* BaseChannel.swift */; };
@@ -41,6 +42,7 @@
 		B1F99041243F4D480062D4FA /* SimplePushProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F99040243F4D480062D4FA /* SimplePushProvider.swift */; };
 		B1F99046243F4D480062D4FA /* SimplePushProvider.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B1F9903E243F4D480062D4FA /* SimplePushProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B1F9904B243FB3270062D4FA /* BaseChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B146FB12243A3A9700DD32B5 /* BaseChannel.swift */; };
+		B1FBFACA2628D87700812ECC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FBFAC92628D87700812ECC /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -133,8 +135,8 @@
 		489648A924535E7F00BA30B9 /* DirectoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryViewModel.swift; sourceTree = "<group>"; };
 		489ABFBD24AA88EE00436F6C /* RootViewCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewCoordinator.swift; sourceTree = "<group>"; };
 		489F1BEF24AA754600040B1D /* SimplePushApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplePushApp.swift; sourceTree = "<group>"; };
-		489F1BF224AA791700040B1D /* AppInitializer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInitializer.swift; sourceTree = "<group>"; };
 		489FDFFD247F7E0D00A95279 /* Presenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presenter.swift; sourceTree = "<group>"; };
+		48A26AD425F8106900F46ACC /* CellularProviderInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CellularProviderInfo.swift; sourceTree = "<group>"; };
 		48B5C04E2437C15E00DBA7C9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		48C0BB9524378CEF002D1244 /* SimplePush.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SimplePush.entitlements; sourceTree = "<group>"; };
 		48C0BB9624378CEF002D1244 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
@@ -143,6 +145,7 @@
 		48DF9CA8243B75C3005CABAB /* MessagingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagingView.swift; sourceTree = "<group>"; };
 		48DF9CAA243B7EB3005CABAB /* MessagingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagingViewModel.swift; sourceTree = "<group>"; };
 		B102A174243D0544008D2E9D /* CallManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallManager.swift; sourceTree = "<group>"; };
+		B1056CEA262F194B0016A0BB /* SettingsStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStyle.swift; sourceTree = "<group>"; };
 		B146FB09243A147700DD32B5 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		B146FB10243A33BE00DD32B5 /* ControlChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlChannel.swift; sourceTree = "<group>"; };
 		B146FB12243A3A9700DD32B5 /* BaseChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseChannel.swift; sourceTree = "<group>"; };
@@ -154,6 +157,7 @@
 		B1F99040243F4D480062D4FA /* SimplePushProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimplePushProvider.swift; sourceTree = "<group>"; };
 		B1F99042243F4D480062D4FA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1F99043243F4D480062D4FA /* SimplePushProvider.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SimplePushProvider.entitlements; sourceTree = "<group>"; };
+		B1FBFAC92628D87700812ECC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F496DBBB520A1AE63B45B129 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -205,10 +209,11 @@
 			isa = PBXGroup;
 			children = (
 				489F1BEF24AA754600040B1D /* SimplePushApp.swift */,
-				489F1BF224AA791700040B1D /* AppInitializer.swift */,
+				B1FBFAC92628D87700812ECC /* AppDelegate.swift */,
 				48C0BB9924378D34002D1244 /* UI */,
 				48DF9CA1243B70B1005CABAB /* Managers */,
 				48C0BB8E24378C83002D1244 /* Networking */,
+				48A26AD225F8104400F46ACC /* Utilities */,
 				4848BE002436DACC004D40EA /* Resources */,
 			);
 			path = SimplePush;
@@ -270,6 +275,14 @@
 			path = Networking;
 			sourceTree = "<group>";
 		};
+		48A26AD225F8104400F46ACC /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				48A26AD425F8106900F46ACC /* CellularProviderInfo.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 		48C0BB8E24378C83002D1244 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
@@ -290,6 +303,7 @@
 				48DF9CAA243B7EB3005CABAB /* MessagingViewModel.swift */,
 				4815196D243D7FCF008E4957 /* MessageBubbleView.swift */,
 				48B5C04E2437C15E00DBA7C9 /* SettingsView.swift */,
+				B1056CEA262F194B0016A0BB /* SettingsStyle.swift */,
 				48DF9CA6243B7335005CABAB /* SettingsViewModel.swift */,
 				489FDFFD247F7E0D00A95279 /* Presenter.swift */,
 			);
@@ -473,14 +487,15 @@
 			files = (
 				48DF9CA9243B75C3005CABAB /* MessagingView.swift in Sources */,
 				489ABFBE24AA88EE00436F6C /* RootViewCoordinator.swift in Sources */,
+				B1056CEB262F194B0016A0BB /* SettingsStyle.swift in Sources */,
 				B146FB13243A3A9700DD32B5 /* BaseChannel.swift in Sources */,
 				487AB1A42437A4B90072CEA9 /* UserViewModel.swift in Sources */,
 				48B5C04F2437C15E00DBA7C9 /* SettingsView.swift in Sources */,
 				489FDFFE247F7E0D00A95279 /* Presenter.swift in Sources */,
 				B146FB0A243A147700DD32B5 /* SettingsManager.swift in Sources */,
-				489F1BF324AA791700040B1D /* AppInitializer.swift in Sources */,
 				48DF9CAB243B7EB3005CABAB /* MessagingViewModel.swift in Sources */,
 				4815196E243D7FCF008E4957 /* MessageBubbleView.swift in Sources */,
+				48A26AD525F8106900F46ACC /* CellularProviderInfo.swift in Sources */,
 				B102A175243D0544008D2E9D /* CallManager.swift in Sources */,
 				B150415B243E2190004FD0DB /* PushConfigurationManager.swift in Sources */,
 				B146FB11243A33BE00DD32B5 /* ControlChannel.swift in Sources */,
@@ -492,6 +507,7 @@
 				489F1BF024AA754600040B1D /* SimplePushApp.swift in Sources */,
 				489648A824535E4A00BA30B9 /* DirectoryView.swift in Sources */,
 				48DF9CA7243B7335005CABAB /* SettingsViewModel.swift in Sources */,
+				B1FBFACA2628D87700812ECC /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -669,7 +685,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = SimplePush/Resources/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -695,7 +711,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = SimplePush/Resources/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -712,14 +728,14 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 11D96015FA0D5D30BEFDA2CA /* SampleCode.xcconfig */;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = NO;
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CODE_SIGN_ENTITLEMENTS = SimplePushProvider/SimplePushProvider.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SimplePushProvider/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -738,14 +754,14 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 11D96015FA0D5D30BEFDA2CA /* SampleCode.xcconfig */;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = NO;
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CODE_SIGN_ENTITLEMENTS = SimplePushProvider/SimplePushProvider.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SimplePushProvider/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

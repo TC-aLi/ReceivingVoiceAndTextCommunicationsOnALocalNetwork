@@ -2,7 +2,7 @@
 See LICENSE folder for this sample’s licensing information.
 
 Abstract:
-`Channel` listens for new connections and passes them to the Router for management after the user registration is received.
+`Channel` listens for new connections and passes them to the router for management after the user registration is received.
 */
 
 import Foundation
@@ -82,7 +82,7 @@ class Channel {
             let networkSession = RequestResponseSession()
             
             if type == .notification {
-                // By default a RequestResponseSession disconnects when a request fails. This behavior is undesired when the connection
+                // By default, a RequestResponseSession disconnects when a request fails. This behavior is undesired when the connection
                 // comes from within an AppPushProvider because the connection could succeed in the near future. For example, a failed
                 // heartbeat in the HeartbeatCoordinator marks the `isSessionResponsive` flag as false rather than tearing down the connection.
                 networkSession.disconnectOnFailure = false

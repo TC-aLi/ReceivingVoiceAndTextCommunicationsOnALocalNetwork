@@ -6,7 +6,7 @@ Abstract:
 */
 
 import Foundation
-import os
+import os.log
 
 public class Logger {
     public enum Subsystem: String {
@@ -17,15 +17,16 @@ public class Logger {
     }
     
     private var prependString: String
-    private var osLog: OSLog
+    private var logger: os.Logger
     
     public init(prependString: String, subsystem: Subsystem) {
         self.prependString = prependString
         let bundleID = Bundle(for: type(of: self)).bundleIdentifier ?? "com.simplepush"
-        self.osLog = OSLog(subsystem: bundleID + "." + subsystem.rawValue, category: "Debug")
+        logger = os.Logger(subsystem: bundleID + "." + subsystem.rawValue, category: "Debug")
     }
     
     public func log(_ message: String) {
-        os_log("%@: %@", log: osLog, type: .default, prependString, message)
+        let prependString = prependString
+        logger.log("\(prependString, privacy: .public): \(message, privacy: .public)")
     }
 }

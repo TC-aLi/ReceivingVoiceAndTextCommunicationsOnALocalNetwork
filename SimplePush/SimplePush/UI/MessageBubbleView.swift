@@ -25,7 +25,7 @@ struct MessageBubbleView: View {
                 .textCase(nil)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .foregroundColor(.white)
+        .foregroundColor(Color.white)
         .padding(15)
         .background(background)
     }

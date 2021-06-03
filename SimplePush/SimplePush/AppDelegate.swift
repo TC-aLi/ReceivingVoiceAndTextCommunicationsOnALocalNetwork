@@ -2,37 +2,40 @@
 See LICENSE folder for this sample’s licensing information.
 
 Abstract:
-Initializes the app's subsystems.
+Responds to app life cycle events and initializes the app's subsystems.
 */
 
 import Foundation
-import SwiftUI
+import UIKit
 import Combine
 import SimplePushKit
 
-class AppInitializer: ObservableObject {
-    private let dispatchQueue = DispatchQueue(label: "AppInitializer.dispatchQueue")
+class AppDelegate: NSObject, UIApplicationDelegate {
+    private let dispatchQueue = DispatchQueue(label: "AppDelegate.dispatchQueue")
     private var cancellables = Set<AnyCancellable>()
-    private let logger = Logger(prependString: "AppInitializer", subsystem: .general)
+    private let logger = Logger(prependString: "AppDelegate", subsystem: .general)
     
-    init() {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        // It is important to initialize the PushConfigurationManager as early as possible during app initialization.
         PushConfigurationManager.shared.initialize()
+
+        // Initialize the central messaging manager for text communication and request notification permission from the user.
         MessagingManager.shared.initialize()
         MessagingManager.shared.requestNotificationPermission()
-        
+
         // Register this device with the control channel.
         let user = User(uuid: UserManager.shared.currentUser.uuid, deviceName: UserManager.shared.currentUser.deviceName)
         ControlChannel.shared.register(user)
-        
-        // Connect the control channel when the app is in the foreground or responding to a CallKit call in the background.
-        // Disconnect the control channel when the app is in the background and not in a CallKit call.
+
+        // Connect the control channel when the app is in the foreground or responding to a CallKit call in the background. Disconnect the control
+        // channel when the app is in the background and not in a CallKit call.
         isExecutingInBackgroundPublisher
             .combineLatest(CallManager.shared.$state)
             .sink { [weak self] isExecutingInBackground, callManagerState in
                 guard let self = self else {
                     return
                 }
-                
+
                 if isExecutingInBackground {
                     switch callManagerState {
                     case .connecting:
@@ -50,13 +53,13 @@ class AppInitializer: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-        
-        NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification)
-            .sink { [weak self] _ in
-                self?.logger.log("Application is terminating, disconnecting control channel")
-                ControlChannel.shared.disconnect()
-            }
-            .store(in: &cancellables)
+
+        return true
+    }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        logger.log("Application is terminating, disconnecting control channel")
+        ControlChannel.shared.disconnect()
     }
     
     // MARK: - Publishers

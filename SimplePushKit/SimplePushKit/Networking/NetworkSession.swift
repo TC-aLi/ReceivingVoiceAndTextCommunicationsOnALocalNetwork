@@ -29,31 +29,34 @@ public class NetworkSession {
     
     public var logger: Logger {
         get {
-            os_unfair_lock_lock(lock)
-            let logger = _logger
-            os_unfair_lock_unlock(lock)
+            var logger: Logger!
+            
+            loggerDispatchQueue.sync { [unowned self] in
+                logger = _logger
+            }
+            
             return logger
         }
         set {
-            os_unfair_lock_lock(lock)
-            _logger = newValue
-            os_unfair_lock_unlock(lock)
+            loggerDispatchQueue.sync { [unowned self] in
+                _logger = newValue
+            }
         }
     }
     
     public private(set) lazy var statePublisher = {
         stateSubject
-        .removeDuplicates()
-        .eraseToAnyPublisher()
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }()
     
     private(set) var connection: NWConnection?
     private let dispatchQueue = DispatchQueue(label: "NetworkSession.dispatchQueue")
+    private let loggerDispatchQueue = DispatchQueue(label: "NetworkSession.loggerDispatchQueue")
     private let stateSubject = CurrentValueSubject<State, Never>(.disconnected)
     private let retryInterval = DispatchTimeInterval.seconds(5)
     private var retryWorkItem: DispatchWorkItem?
     private var cancellables = Set<AnyCancellable>()
-    private let lock = os_unfair_lock_t.allocate(capacity: 1)
     private var _logger = Logger(prependString: "NetworkSession", subsystem: .networking)
     
     public init() {
@@ -122,28 +125,16 @@ public class NetworkSession {
         guard let connection = connection else {
             return
         }
-
-        var retry = true
         
         switch error {
         case .posix(let code):
             logger.log("POSIX Error Code - \(code)")
-            switch code {
-            case .ENETDOWN, .ENETUNREACH, .EHOSTDOWN, .EHOSTUNREACH:
-                retry = false
-            default:
-                break
-            }
         case .tls(let code):
             logger.log("TLS Error Code - \(code)")
         case .dns(let code):
             logger.log("DNS Error Code - \(code)")
         default:
             logger.log("Unknown error type encountered in \(#function)")
-        }
-        
-        guard retry else {
-            return
         }
         
         retryWorkItem = DispatchWorkItem { [weak self] in

@@ -10,7 +10,7 @@ import SimplePushKit
 
 @main
 struct SimplePushApp: App {
-    @StateObject private var appInitializer = AppInitializer()
+    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
     @StateObject private var rootViewCoordinator = RootViewCoordinator()
     @State private var userViewModels = [UUID: UserViewModel]()
     

@@ -2,7 +2,7 @@
 See LICENSE folder for this sample’s licensing information.
 
 Abstract:
-A custom NWProtocolFramerImplementation that encodes/decodes using a prepended messsage length header.
+A custom NWProtocolFramerImplementation that encodes/decodes using a prepended message length header.
 */
 
 import Foundation

@@ -67,8 +67,8 @@ extension MessagingManager: UNUserNotificationCenterDelegate {
             return completionHandler([.badge, .sound, .banner])
         }
         
-        // If a message was received, and the user matches the one shown by the current `MessagingView`, load the message
-        // in the `MessagingView`. Otherwise, present the standard notification.
+        // If a message was received, and the user matches the one shown by the current `MessagingView`, load the message in the `MessagingView`.
+        // Otherwise, present the standard notification.
         if let presentedMessageViewUser = presentedMessageViewUser, presentedMessageViewUser.uuid == message.routing.sender.uuid {
             completionHandler([])
             messageSubject.send(message)

@@ -30,7 +30,7 @@ class Router {
                 .receive(on: dispatchQueue)
                 .sink { [weak self] state in
                     if state == .disconnected {
-                        // The notification channel has disconnected so cancel any pending calls.
+                        // The notification channel has disconnected, so cancel any pending calls.
                         if let call = self?.call(for: client.user), call.status == .pending {
                             self?.cancel(call: call, with: .unavailable, initiatedBy: client.user)
                         }
@@ -99,7 +99,7 @@ class Router {
                 let receiver = callAction.receiver
                 precondition(receiver != nil, "Connected CallActions must always have a receiver.")
                 
-                // The receiver is already in another Call, let the client know the receiver is unavailable.
+                // The receiver is already in another call, so let the client know the receiver is unavailable.
                 guard self.call(for: receiver!) == nil else {
                     send(message: CallAction(action: .unavailable), to: client.user)
                     return
@@ -119,7 +119,7 @@ class Router {
             // Update the call to active.
             call.status = .active
             
-            // Let both users know that we have a connected call.
+            // Let both users know that they have a connected call.
             for user in call.participants {
                 send(message: CallAction(action: .connect), to: user)
             }

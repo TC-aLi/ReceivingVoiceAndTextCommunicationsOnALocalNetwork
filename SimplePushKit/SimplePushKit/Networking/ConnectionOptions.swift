@@ -66,29 +66,28 @@ public enum ConnectionOptions {
                 self.publicKeyHash = publicKeyHash
             }
             
-            // Attempt to verify pinned certificate.
+            // Attempt to verify the pinned certificate.
             public var options: NWProtocolTLS.Options {
                 let options = NWProtocolTLS.Options()
                 
                 sec_protocol_options_set_verify_block(options.securityProtocolOptions, { [self] secProtocolMetadata, secTrust, secProtocolVerifyComplete in
                     let trust = sec_trust_copy_ref(secTrust).takeRetainedValue()
                     
-                    guard let serverCertificate = SecTrustGetCertificateAtIndex(trust, 0) else {
+                    guard let serverPublicKeyData = publicKey(from: trust) else {
                         secProtocolVerifyComplete(false)
                         return
                     }
                     
-                    let serverPublicKey = SecCertificateCopyKey(serverCertificate)
-                    let serverPublicKeyData = SecKeyCopyExternalRepresentation(serverPublicKey!, nil)! as Data
                     let keyHash = cryptoKitSHA256(data: serverPublicKeyData)
                     
-                    if keyHash == publicKeyHash {
-                        // Presented certificate matches the pinned cert.
-                        secProtocolVerifyComplete(true)
-                    } else {
+                    guard keyHash == publicKeyHash else {
                         // Presented certificate doesn't match.
                         secProtocolVerifyComplete(false)
+                        return
                     }
+                    
+                    // Presented certificate matches the pinned cert.
+                    secProtocolVerifyComplete(true)
                 }, dispatchQueue)
                 
                 return options
@@ -104,6 +103,28 @@ public enum ConnectionOptions {
                 let hash = SHA256.hash(data: data)
                 
                 return Data(hash).base64EncodedString()
+            }
+            
+            private func publicKey(from trust: SecTrust) -> Data? {
+                var data: Data?
+                
+                if #available(iOS 15.0, macOS 12.0, *) {
+                    guard let certificateChain = SecTrustCopyCertificateChain(trust) as? [SecCertificate], let serverCertificate = certificateChain.first else {
+                        return nil
+                    }
+                    
+                    let publicKey = SecCertificateCopyKey(serverCertificate)
+                    data = SecKeyCopyExternalRepresentation(publicKey!, nil)! as Data
+                } else {
+                    guard let serverCertificate = SecTrustGetCertificateAtIndex(trust, 0) else {
+                        return nil
+                    }
+                    
+                    let publicKey = SecCertificateCopyKey(serverCertificate)
+                    data = SecKeyCopyExternalRepresentation(publicKey!, nil)! as Data
+                }
+                
+                return data
             }
         }
     }

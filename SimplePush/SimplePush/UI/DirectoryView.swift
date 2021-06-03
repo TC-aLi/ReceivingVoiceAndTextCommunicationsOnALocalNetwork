@@ -60,13 +60,14 @@ struct DirectoryView: View {
     @ViewBuilder func placeholderView(state: DirectoryViewModel.State) -> some View {
         VStack(spacing: 30) {
             image(for: state)
-                .font(.system(size: 60, weight: .light))
+                .font(.system(size: 60, weight: .regular))
                 .foregroundColor(Color("Colors/PrimaryText"))
-            Text(viewModel.stateHumanReadable)
+            Text(stateHumanReadable)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .multilineTextAlignment(.center)
                 .foregroundColor(Color("Colors/PrimaryText"))
+                .padding([.leading, .trailing], 30)
         }
     }
     
@@ -75,11 +76,35 @@ struct DirectoryView: View {
         case .configurationNeeded:
             Image(systemName: "wrench")
         case .waitingForActivePushManager:
-            Image(systemName: "wifi.exclamationmark")
+            Image(systemName: "exclamationmark.triangle")
         case .waitingForUsers:
             Image(systemName: "person.crop.circle.badge.xmark")
         case .connecting, .connected:
             Image(systemName: "bolt")
+        }
+    }
+    
+    var stateHumanReadable: String {
+        switch viewModel.state {
+        case .configurationNeeded:
+            return "Configure Server and Local Push Connectivity in Settings"
+        case .waitingForActivePushManager:
+            let ssid = SettingsManager.shared.settings.pushManagerSettings.ssid
+            
+            switch viewModel.networkConfigurationMode {
+            case .wifi:
+                return "Connect to \(ssid)"
+            case .cellular:
+                return "Connect to the configured cellular network"
+            case .both:
+                return "Connect to \(ssid) or the configured cellular network"
+            }
+        case .connecting:
+            return "Connecting"
+        case .connected:
+            return "Connected"
+        case .waitingForUsers:
+            return "Waiting for contacts"
         }
     }
     

@@ -23,17 +23,17 @@ class SettingsManager: NSObject {
     }
     
     private(set) lazy var settingsPublisher = settingsSubject.eraseToAnyPublisher()
+    private let settingsWillWriteSubject = PassthroughSubject<Void, Never>()
     private static let settingsKey = "settings"
     private static let userDefaults = UserDefaults(suiteName: "group.com.example.apple-samplecode.SimplePush")!
     private let settingsSubject: CurrentValueSubject<Settings, Never>
-    private var cancellables = Set<AnyCancellable>()
     private static let logger = Logger(prependString: "SettingsManager", subsystem: .general)
     
     override init() {
         var settings = Self.fetch()
         
         if settings == nil {
-            settings = Settings(uuid: UUID(), deviceName: UIDevice.current.name, ssid: "", host: "")
+            settings = Settings(uuid: UUID(), deviceName: UIDevice.current.name)
             
             do {
                 try Self.set(settings: settings!)
@@ -51,32 +51,16 @@ class SettingsManager: NSObject {
     
     // MARK: - Publishers
     
-    // A publisher that observes the settingsSubject and ensures it publishes only unique host/ssid values.
-    private(set) lazy var hostSSIDPublisher = {
-        settingsSubject
-            .scan((false, nil), { previousResult, settings -> (Bool, Settings?) in
-                guard let previousSettings = previousResult.1 else {
-                    // If this is the first call to this publisher, pass the settings through since we don't have previous settings
-                    // to compare against.
-                    return (true, settings)
-                }
-                
-                if previousSettings.host == settings.host && previousSettings.ssid == settings.ssid {
-                    // If the host and ssid both match the previous host and ssid, tell the downstream publisher not to proceed and keep the
-                    // previous settings.
-                    return (false, previousSettings)
-                }
-                
-                return (true, settings)
-            })
-            .compactMap { shouldSaveNewManager, settings -> Settings? in
-                guard shouldSaveNewManager else {
-                    // Honor an indication from upstream to not create a manager from these settings.
-                    return nil
-                }
-                
-                return settings
-            }
+    // A publisher that emits new settings following a call to `set(settings:)`.
+    private(set) lazy var settingsDidWritePublisher = {
+        settingsWillWriteSubject
+        .compactMap { [weak self] _ in
+            self?.settingsPublisher
+                .dropFirst()
+                .first()
+        }
+        .switchToLatest()
+        .eraseToAnyPublisher()
     }()
     
     // MARK: - Actions
@@ -94,6 +78,7 @@ class SettingsManager: NSObject {
             throw Error.uuidMismatch
         }
         
+        settingsWillWriteSubject.send()
         try Self.set(settings: settings)
         settingsSubject.send(settings)
     }

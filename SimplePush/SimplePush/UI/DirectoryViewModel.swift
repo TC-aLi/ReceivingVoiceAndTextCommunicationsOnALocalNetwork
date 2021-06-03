@@ -18,6 +18,12 @@ class DirectoryViewModel: ObservableObject {
         case waitingForUsers
     }
     
+    enum NetworkConfigurationMode {
+        case wifi
+        case cellular
+        case both
+    }
+    
     @Published var state: State = .connecting
     @Published var users = [User]()
     @Published var connectedUser: User?
@@ -29,7 +35,7 @@ class DirectoryViewModel: ObservableObject {
         ControlChannel.shared.statePublisher
             .combineLatest(SettingsManager.shared.settingsPublisher, PushConfigurationManager.shared.pushManagerIsActivePublisher, $users)
             .map { controlChannelState, settings, pushManagerIsActive, users -> State in
-                guard !settings.ssid.isEmpty && !settings.host.isEmpty else {
+                guard !settings.pushManagerSettings.isEmpty else {
                     return .configurationNeeded
                 }
                 
@@ -85,19 +91,17 @@ class DirectoryViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    var stateHumanReadable: String {
-        switch state {
-        case .configurationNeeded:
-            return "Configure Server and SSID in Settings"
-        case .waitingForActivePushManager:
-            let ssid = SettingsManager.shared.settings.ssid
-            return "Connect to \(ssid)"
-        case .connecting:
-            return "Connecting"
-        case .connected:
-            return "Connected"
-        case .waitingForUsers:
-            return "Waiting for contacts"
+    var networkConfigurationMode: NetworkConfigurationMode {
+        let settings = SettingsManager.shared.settings
+        let isConnectedToWiFi = !settings.pushManagerSettings.ssid.isEmpty
+        let isConnectedToCellular = !settings.pushManagerSettings.mobileCountryCode.isEmpty && !settings.pushManagerSettings.mobileNetworkCode.isEmpty
+        
+        if isConnectedToWiFi && isConnectedToCellular {
+            return .both
+        } else if isConnectedToWiFi {
+            return .wifi
+        } else {
+            return .cellular
         }
     }
 }
