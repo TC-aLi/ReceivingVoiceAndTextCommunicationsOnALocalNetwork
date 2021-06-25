@@ -388,6 +388,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 11AD04126328586987D2CD5F /* SampleCode.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -421,6 +422,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 11AD04126328586987D2CD5F /* SampleCode.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
@@ -452,6 +454,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 11AD04126328586987D2CD5F /* SampleCode.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -483,6 +486,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 11AD04126328586987D2CD5F /* SampleCode.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
