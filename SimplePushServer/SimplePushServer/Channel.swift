@@ -101,7 +101,7 @@ class Channel {
                     return
                 }
                 
-                logger.log("Received registration for user \(user.deviceName)")
+                logger.log("Received registration for user \(user.deviceName) \(user.uuid)")
                 router?.register(user: user, session: networkSession, type: type)
                 pendingSession.cancellables.removeAll()
                 pendingSessions.remove(pendingSession)

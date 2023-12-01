@@ -44,7 +44,7 @@ class Client {
     init(user: User) {
         self.user = user
         
-        logger = Logger(prependString: "\(user.deviceName) - Client", subsystem: .general)
+        logger = Logger(prependString: "\(user.deviceName) \(user.uuid) - Client", subsystem: .general)
         
         notificationNetworkSessionState
         .combineLatest(notificationIsResponsive)
@@ -86,12 +86,12 @@ class Client {
             var cancellables = Set<AnyCancellable>()
             
             // Update the NetworkSession logger to more easily identify the channel.
-            session.logger = Logger(prependString: "\(self.user.deviceName) - \(type.rawValue.capitalized) Channel - NetworkSession", subsystem: .networking)
+            session.logger = Logger(prependString: "\(self.user.deviceName) \(self.user.uuid) - \(type.rawValue.capitalized) Channel - NetworkSession", subsystem: .networking)
             
             var heartbeatCoordinator: HeartbeatCoordinator?
             
             if let session = session as? RequestResponseSession {
-                let heartbeatLogger = Logger(prependString: "\(self.user.deviceName) - \(type.rawValue.capitalized) Channel - Heartbeat", subsystem: .heartbeat)
+                let heartbeatLogger = Logger(prependString: "\(self.user.deviceName) - \(self.user.uuid) \(type.rawValue.capitalized) Channel - Heartbeat", subsystem: .heartbeat)
                 heartbeatCoordinator = HeartbeatCoordinator(interval: self.heartbeatInterval, logger: heartbeatLogger)
                 heartbeatCoordinator!.session = session
                 

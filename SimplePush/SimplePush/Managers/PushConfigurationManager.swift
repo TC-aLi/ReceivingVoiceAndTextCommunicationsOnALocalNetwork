@@ -24,7 +24,7 @@ class PushConfigurationManager: NSObject {
     private let logger = Logger(prependString: "PushConfigurationManager", subsystem: .general)
     private var pushManager: NEAppPushManager?
     private let pushManagerDescription = "SimplePushDefaultConfiguration"
-    private let pushProviderBundleIdentifier = "com.example.apple-samplecode.SimplePush.SimplePushProvider"
+    private let pushProviderBundleIdentifier = "com.aliattc.simplepush.provider"
     private let pushManagerIsActiveSubject = CurrentValueSubject<Bool, Never>(false)
     private var pushManagerIsActiveCancellable: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
